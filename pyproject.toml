@@ -21,6 +21,9 @@ version_files = ["pyproject.toml:version"]
 poethepoet = ">=0.20.0"
 python = ">=3.9,<3.9.7 || >3.9.7,<4.0"
 streamlit = ">=1.19.0"
+instructor = "^0.2.8"
+langchain = "^0.0.305"
+llama-index = "^0.8.36"
 
 [tool.poetry.group.test.dependencies]  # https://python-poetry.org/docs/master/managing-dependencies/
 black = ">=23.3.0"

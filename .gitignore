@@ -23,9 +23,9 @@ data/
 .hypothesis/
 
 # Jupyter
-*.ipynb
+#*.ipynb
 .ipynb_checkpoints/
-notebooks/
+#notebooks/
 
 # macOS
 .DS_Store
@@ -62,3 +62,7 @@ __pycache__/
 
 # VS Code
 .vscode/
+
+# Project
+keys
+openai_key
