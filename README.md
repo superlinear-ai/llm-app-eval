@@ -5,20 +5,17 @@
 Evaluates LLM-based applications.
 
 ## To-do's
-- [x] Convert my EHBO notes into question-answer pairs, using OpenAI Function Calling.
-- [/] Turn the question-answer pairs into a test set.
-- [x] Build Streamlit app for testing myself.
-    - [] Bug: when I click on the 'Evaluate' button, the app goes to the next question.
+- [x] Convert EHBO notes into question-answer pairs, using OpenAI Function Calling.
+- [x] Turn the question-answer pairs into a test set.
 - [x] Build LLM component to evaluate the given answers by comparing it with the reference answer.
 - [x] Build LLM 'app' that can answer the questions.
 - [x] Evaluate the LLM app with the LLM evaluator.
-- [] Streamlit page to view the evaluation results.
-- [] Add the question-answer pairs as the knowledge base for that app.
-- [] Evaluate the LLM app with the LLM evaluator.
-- [] Compare the results.
-- [] Streamlit page to view, edit and add test cases.
-- [] Cache the OpenAI function calls.
-
+- [x] Streamlit page to view the evaluation results.
+- [ ] Combine the evaluation results into a single metric.
+- [ ] Evaluate and compare different LLM apps (GPT-3.5, GPT-4, with RAG)
+- [ ] Streamlit page to visualize the comparison.
+- [ ] Streamlit page to view, edit and add test cases.
+- [ ] Integrate with MLflow for experiment tracking (?)
 
 
 ## Using
