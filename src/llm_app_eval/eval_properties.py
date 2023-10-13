@@ -1,7 +1,49 @@
+from functools import lru_cache
+
+import numpy as np
 import openai
 from evaluator import EvalProperty, OutputFormat, PropertyResult, TestCase
+from pydantic import BaseModel
 
-property_llm = "gpt-3.5-turbo-0613"
+PROPERTY_LLM = "gpt-3.5-turbo-0613"
+
+
+@lru_cache
+def get_embedding(text, model="text-embedding-ada-002"):
+    text = text.replace("\n", " ")
+    return openai.Embedding.create(input=[text], model=model)["data"][0]["embedding"]
+
+
+def cosine_similarity(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+
+def output_similarity(test_case: TestCase, llm_app_result: OutputFormat) -> PropertyResult:
+    if test_case.reference_output and llm_app_result.answer:
+        app_output_emb = get_embedding(llm_app_result.answer)
+        reference_emb = get_embedding(test_case.reference_output.answer)
+        result = PropertyResult(
+            feedback="",
+            score=cosine_similarity(app_output_emb, reference_emb),
+        )
+    else:
+        result = None
+    return result
+
+
+def output_verbosity(test_case: TestCase, llm_app_result: OutputFormat) -> PropertyResult:
+    if test_case.reference_output and llm_app_result.answer:
+        result = PropertyResult(
+            feedback="", score=len(llm_app_result.answer) / len(test_case.reference_output.answer)
+        )
+    else:
+        result = None
+    return result
+
+
+class LlmPropertyResult(BaseModel):
+    feedback: str
+    pass_fail: bool
 
 
 def evaluate_property_with_llm(
@@ -9,7 +51,7 @@ def evaluate_property_with_llm(
 ) -> PropertyResult:
     return openai.ChatCompletion.create(
         model=model,
-        response_model=PropertyResult,
+        response_model=LlmPropertyResult,
         messages=[
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_message},
@@ -20,7 +62,7 @@ def evaluate_property_with_llm(
 def factually_consistent(test_case: TestCase, llm_app_result: OutputFormat) -> PropertyResult:
     if test_case.reference_output and llm_app_result.answer:
         result = evaluate_property_with_llm(
-            model=property_llm,
+            model=PROPERTY_LLM,
             system_message="Evaluate the answer. The answer should be factually consistent with the reference answer. If not, explain why.",
             user_message=f"Answer: {llm_app_result.answer}\nReference Answer: {test_case.reference_output.answer}",
         )
@@ -32,7 +74,7 @@ def factually_consistent(test_case: TestCase, llm_app_result: OutputFormat) -> P
 def improves_historical_answer(test_case: TestCase, llm_app_result: OutputFormat) -> PropertyResult:
     if test_case.test_input and test_case.historical_output and llm_app_result.answer:
         result = evaluate_property_with_llm(
-            model=property_llm,
+            model=PROPERTY_LLM,
             system_message="Evaluate the new answer. Is the new answer better than the old answer? Explain why.",
             user_message=f"Question: {test_case.test_input.question}\nOld answer: {test_case.historical_output.answer}\nNew answer: {llm_app_result.answer}",
         )
@@ -51,7 +93,7 @@ def takes_feedback_into_account(
         and test_case.historical_feedback
     ):
         result = evaluate_property_with_llm(
-            model=property_llm,
+            model=PROPERTY_LLM,
             system_message="Evaluate the new answer. Does the new answer improve upon the old one by taking the feedback into account? Explain why.",
             user_message=f"Question: {test_case.test_input.question}\nOld answer: {test_case.historical_output.answer}\nOld feedback: {test_case.historical_feedback}\nNew answer: {llm_app_result.answer}",
         )
@@ -95,5 +137,15 @@ properties = [
         property_name="LengthWithinBounds",
         description="The answer is max 20% longer than the reference answer.",
         eval_func=length_within_bounds,
+    ),
+    EvalProperty(
+        property_name="CosineSimilarity",
+        description="The answer is similar to the reference answer.",
+        eval_func=output_similarity,
+    ),
+    EvalProperty(
+        property_name="Verbosity",
+        description="The answer is not too verbose.",
+        eval_func=output_verbosity,
     ),
 ]

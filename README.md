@@ -4,6 +4,8 @@
 
 Evaluates LLM-based applications.
 
+**Check the `example.ipynb` notebook for an example of how to use this package.**
+
 ## To-do's
 - [x] Convert EHBO notes into question-answer pairs, using OpenAI Function Calling.
 - [x] Turn the question-answer pairs into a test set.
@@ -11,8 +13,8 @@ Evaluates LLM-based applications.
 - [x] Build LLM 'app' that can answer the questions.
 - [x] Evaluate the LLM app with the LLM evaluator.
 - [x] Streamlit page to view the evaluation results.
-- [ ] Combine the evaluation results into a single metric.
-- [ ] Evaluate and compare different LLM apps (GPT-3.5, GPT-4, with RAG)
+- [x] Combine the evaluation results into a single metric.
+- [x] Evaluate and compare different LLM apps (GPT-3.5, GPT-4, with RAG)
 - [ ] Streamlit page to visualize the comparison.
 - [ ] Streamlit page to view, edit and add test cases.
 - [ ] Integrate with MLflow for experiment tracking (?)
