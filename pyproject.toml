@@ -24,6 +24,7 @@ streamlit = ">=1.19.0"
 instructor = "^0.2.8"
 langchain = "^0.0.305"
 llama-index = "^0.8.36"
+mlflow = "^2.7.1"
 
 [tool.poetry.group.test.dependencies]  # https://python-poetry.org/docs/master/managing-dependencies/
 black = ">=23.3.0"

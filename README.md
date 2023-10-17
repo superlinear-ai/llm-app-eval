@@ -15,10 +15,9 @@ Evaluates LLM-based applications.
 - [x] Streamlit page to view the evaluation results.
 - [x] Combine the evaluation results into a single metric.
 - [x] Evaluate and compare different LLM apps (GPT-3.5, GPT-4, with RAG)
-- [ ] Streamlit page to visualize the comparison.
+- [x] Integrate with MLflow for experiment tracking.
 - [ ] Streamlit page to view, edit and add test cases.
-- [ ] Integrate with MLflow for experiment tracking (?)
-
+- [ ] Refactor Evaluator.
 
 ## Using
 
