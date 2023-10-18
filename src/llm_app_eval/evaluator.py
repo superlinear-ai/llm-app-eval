@@ -50,6 +50,61 @@ class Evaluator:
         self.properties = properties
         self.results_dir = results_dir
 
+    def save_test_case_results(self, test_case_results: list[TestCaseResult], exp_dir: str):
+        # Convert all test case results into a dataframe.
+        df = pd.DataFrame([tcr.dict() for tcr in test_case_results])
+        # Split the `property_results` into separate columns. The `property_results` column is a dict of dicts.
+        # Each top level key is a property name. Each second level key is a property result (feedback and pass_fail).
+        # The `property_results` column is split into separate columns for each combination of property name and property result.
+        # The values of these columns are the values of the `feedback` and `pass_fail` respectively.
+        df = df.join(pd.json_normalize(df["property_results"]))
+        # Split thein( `output` column into separate columns.
+        df = df.join(pd.json_normalize(df["output"]))
+        # Drop the `property_results` and `output` columns.
+        df = df.drop(columns=["property_results", "output"])
+        # Drop the empty columns.
+        df = df.dropna(axis=1, how="all")
+        # Add the input and reference output to the dataframe, based on the test case id.
+        df = df.merge(
+            pd.DataFrame(
+                {
+                    "test_case_id": [test_case.test_id for test_case in self.test_set],
+                    "test_input": [test_case.test_input.question for test_case in self.test_set],
+                    "reference_output": [
+                        test_case.reference_output.answer
+                        for test_case in self.test_set
+                        if test_case.reference_output
+                    ],
+                }
+            ),
+            on="test_case_id",
+        )
+        # Save the dataframe as CSV
+        df.to_csv(os.path.join(exp_dir, "results.csv"), index=False)
+        return df
+
+    def save_aggregated_results(
+        self,
+        df: pd.DataFrame,
+        exp_dir: str,
+        llm_config: dict,
+        agg_columns: Optional[list[str]] = None,
+    ):
+        # Aggregate the results by taking the mean over the test cases for the `latency` and all `pass_fail` columns.
+        if agg_columns is None:
+            agg_columns = ["latency", "score"]
+        df_agg = df[agg_columns].mean().reset_index()
+        df_agg.columns = ["metric", "value"]
+        # Pivot the metric column to get a column for each metric and a row for each LLM app.
+        df_agg = df_agg.pivot_table(index=None, columns="metric", values="value")
+        # Drop the `metric` index.
+        df_agg = df_agg.reset_index(drop=True)
+        # Add the llm app config dict as columns in front of the aggregated results.
+        df_agg = pd.concat([pd.json_normalize(llm_config), df_agg], axis=1)
+        # Save the aggregated results as CSV.
+        df_agg.to_csv(os.path.join(exp_dir, "results_agg.csv"), index=False)
+        return df_agg
+
     def evaluate_app(
         self,
         llm_app: BaseApp,
@@ -106,55 +161,16 @@ class Evaluator:
             with open(os.path.join(exp_dir, "llm_app.json"), "w") as f:
                 f.write(json.dumps(llm_app.cfg))
 
-            # Convert all test case results into a dataframe
-            df = pd.DataFrame([tcr.dict() for tcr in test_case_results])
-            # Split the `property_results` into separate columns. The `property_results` column is a dict of dicts.
-            # Each top level key is a property name. Each second level key is a property result (feedback and pass_fail).
-            # The `property_results` column is split into separate columns for each combination of property name and property result.
-            # The values of these columns are the values of the `feedback` and `pass_fail` respectively.
-            df = df.join(pd.json_normalize(df["property_results"]))
-            # Split the `output` column into separate columns.
-            df = df.join(pd.json_normalize(df["output"]))
-            # Drop the `property_results` and `output` columns.
-            df = df.drop(columns=["property_results", "output"])
-            # Drop the empty columns.
-            df = df.dropna(axis=1, how="all")
-            # Add the input and reference output to the dataframe, based on the test case id.
-            df = df.merge(
-                pd.DataFrame(
-                    {
-                        "test_case_id": [test_case.test_id for test_case in self.test_set],
-                        "test_input": [
-                            test_case.test_input.question for test_case in self.test_set
-                        ],
-                        "reference_output": [
-                            test_case.reference_output.answer
-                            for test_case in self.test_set
-                            if test_case.reference_output
-                        ],
-                    }
-                ),
-                on="test_case_id",
-            )
-            # Save the dataframe as CSV
-            df.to_csv(os.path.join(exp_dir, "results.csv"), index=False)
+            # Convert all test case results into a dataframe and save it as CSV
+            df = self.save_test_case_results(test_case_results, exp_dir)
 
             # Aggregate the results by taking the mean over the test cases for the `latency` and all `pass_fail` columns.
             agg_columns = ["latency"] + [col for col in df.columns if "score" in col]
-            df_agg = df[agg_columns].mean().reset_index()
-            df_agg.columns = ["metric", "value"]
-            # Pivot the metric column to get a column for each metric and a row for each LLM app.
-            df_agg = df_agg.pivot_table(index=None, columns="metric", values="value")
-            # Drop the `metric` index.
-            df_agg = df_agg.reset_index(drop=True)
-            # Add the llm app config dict as columns in front of the aggregated results.
-            df_agg = pd.concat([pd.json_normalize(llm_app.cfg), df_agg], axis=1)
-            # Save the aggregated results as CSV.
-            df_agg.to_csv(os.path.join(exp_dir, "results_agg.csv"), index=False)
+            df_agg = self.save_aggregated_results(df, exp_dir, llm_app.cfg, agg_columns)
 
-            # Log results to MLflow
+            # Log individual test case results to MLflow
             mlflow.log_table(df, artifact_file="eval_results.json")
-            # Loop over the columns of df_agg and log each column as a metric.
+            # Log metrics by looping over the columns of df_agg and log each column as a metric.
             for col in df_agg.columns:
                 if col in agg_columns:
                     mlflow.log_metric(key=col, value=df_agg[col].values[0])
