@@ -7,7 +7,8 @@ from importlib.metadata import version
 import numpy as np
 import pandas as pd
 import streamlit as st
-from eval_properties import properties
+
+from llm_app_eval.eval_properties import properties
 
 st.title(f"llm-app-eval v{version('llm-app-eval')}")  # type: ignore[no-untyped-call]
 

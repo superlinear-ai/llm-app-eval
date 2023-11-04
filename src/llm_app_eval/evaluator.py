@@ -6,9 +6,10 @@ from typing import Callable, Optional, Union
 
 import mlflow
 import pandas as pd
-from llm_app import BaseApp, InputFormat, OutputFormat
 from pydantic import BaseModel
 from tqdm import tqdm
+
+from llm_app_eval.llm_app import BaseApp, InputFormat, OutputFormat
 
 
 class TestCase(BaseModel):

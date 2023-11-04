@@ -1,9 +1,11 @@
 from functools import lru_cache
+from typing import Optional
 
 import numpy as np
 import openai
-from evaluator import EvalProperty, OutputFormat, PropertyResult, TestCase
 from pydantic import BaseModel
+
+from llm_app_eval.evaluator import EvalProperty, OutputFormat, PropertyResult, TestCase
 
 PROPERTY_LLM = "gpt-3.5-turbo-0613"
 
@@ -18,7 +20,9 @@ def cosine_similarity(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 
-def output_similarity(test_case: TestCase, llm_app_result: OutputFormat) -> PropertyResult:
+def output_similarity(
+    test_case: TestCase, llm_app_result: OutputFormat
+) -> Optional[PropertyResult]:
     if test_case.reference_output and llm_app_result.answer:
         app_output_emb = get_embedding(llm_app_result.answer)
         reference_emb = get_embedding(test_case.reference_output.answer)
@@ -31,7 +35,7 @@ def output_similarity(test_case: TestCase, llm_app_result: OutputFormat) -> Prop
     return result
 
 
-def output_verbosity(test_case: TestCase, llm_app_result: OutputFormat) -> PropertyResult:
+def output_verbosity(test_case: TestCase, llm_app_result: OutputFormat) -> Optional[PropertyResult]:
     if test_case.reference_output and llm_app_result.answer:
         result = PropertyResult(
             feedback="", score=len(llm_app_result.answer) / len(test_case.reference_output.answer)
@@ -59,7 +63,9 @@ def evaluate_property_with_llm(
     )
 
 
-def factually_consistent(test_case: TestCase, llm_app_result: OutputFormat) -> PropertyResult:
+def factually_consistent(
+    test_case: TestCase, llm_app_result: OutputFormat
+) -> Optional[PropertyResult]:
     if test_case.reference_output and llm_app_result.answer:
         result = evaluate_property_with_llm(
             model=PROPERTY_LLM,
@@ -71,7 +77,9 @@ def factually_consistent(test_case: TestCase, llm_app_result: OutputFormat) -> P
     return result
 
 
-def improves_historical_answer(test_case: TestCase, llm_app_result: OutputFormat) -> PropertyResult:
+def improves_historical_answer(
+    test_case: TestCase, llm_app_result: OutputFormat
+) -> Optional[PropertyResult]:
     if test_case.test_input and test_case.historical_output and llm_app_result.answer:
         result = evaluate_property_with_llm(
             model=PROPERTY_LLM,
@@ -85,7 +93,7 @@ def improves_historical_answer(test_case: TestCase, llm_app_result: OutputFormat
 
 def takes_feedback_into_account(
     test_case: TestCase, llm_app_result: OutputFormat
-) -> PropertyResult:
+) -> Optional[PropertyResult]:
     if (
         test_case.test_input
         and test_case.historical_output
@@ -102,12 +110,14 @@ def takes_feedback_into_account(
     return result
 
 
-def length_within_bounds(test_case: TestCase, llm_app_result: OutputFormat) -> PropertyResult:
+def length_within_bounds(
+    test_case: TestCase, llm_app_result: OutputFormat
+) -> Optional[PropertyResult]:
     if test_case.reference_output and llm_app_result.answer:
         if len(llm_app_result.answer) <= 1.2 * len(test_case.reference_output.answer):
-            result = PropertyResult(feedback="The answer is not too long.", pass_fail=True)
+            result = PropertyResult(feedback="The answer is not too long.", score=1)
         else:
-            result = PropertyResult(feedback="The answer is too long.", pass_fail=False)
+            result = PropertyResult(feedback="The answer is too long.", score=0)
     else:
         result = None
     return result

@@ -1,22 +1,16 @@
 [![Open in Dev Containers](https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/StijnGoossens/llm-app-eval)
 
-# llm-app-eval
+# Evaluation of LLM-based applications
 
-Evaluates LLM-based applications.
+An implementation of the principles of evaluating LLM-based applications. This repository accompanies the blog post ['Steady the Course: Navigating the Evaluation of LLM-based Applications'](https://medium.com/@stijn.sg.goossens/steady-the-course-navigating-the-evaluation-of-llm-based-applications-8b7a22734fc9).
 
-**Check the `example.ipynb` notebook for an example of how to use this package.**
+💡 Check out the [example notebook](src/llm_app_eval/example.ipynb) for an end-to-end illustration of the most important concepts (LLM app, test case, test properties and Evaluator), including the integration with MLflow.
 
-## To-do's
-- [x] Convert EHBO notes into question-answer pairs, using OpenAI Function Calling.
-- [x] Turn the question-answer pairs into a test set.
-- [x] Build LLM component to evaluate the given answers by comparing it with the reference answer.
-- [x] Build LLM 'app' that can answer the questions.
-- [x] Evaluate the LLM app with the LLM evaluator.
-- [x] Streamlit page to view the evaluation results.
-- [x] Combine the evaluation results into a single metric.
-- [x] Evaluate and compare different LLM apps (GPT-3.5, GPT-4, with RAG)
-- [x] Integrate with MLflow for experiment tracking.
-- [ ] Streamlit page to view, edit and add test cases.
+🔑 Add your OpenAI API key to a file named `openai_key` in the root directory before running the notebook.
+
+The image below shows an architectural overview of the evaluation framework and illustrates an important feedback loop. See the aforementioned blog post for more information. The scope of this repository is indicated by the green box.
+
+![Evaluation feedback loop](images/evaluation_feedback_loop.png)
 
 ## Using
 
