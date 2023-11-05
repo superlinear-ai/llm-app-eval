@@ -12,10 +12,16 @@ from llm_app_eval.eval_properties import properties
 
 st.title(f"llm-app-eval v{version('llm-app-eval')}")  # type: ignore[no-untyped-call]
 
-
+# Define the paths to the test cases and evaluation results
 TEST_SET_FOLDER = "src/llm_app_eval/data/test_cases"
 EVAL_FOLDER = "src/llm_app_eval/data/eval_results"
-EVAL_RUNS = ["20231001_175828"]
+
+# Create folders if they don't exist
+os.makedirs(TEST_SET_FOLDER, exist_ok=True)
+os.makedirs(EVAL_FOLDER, exist_ok=True)
+
+# Get the list of evaluation runs
+EVAL_RUNS = os.listdir(EVAL_FOLDER)
 
 # Load all the test cases JSON files
 test_cases = {}  # type: ignore

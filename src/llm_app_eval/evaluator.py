@@ -36,8 +36,6 @@ class TestCaseResult(BaseModel):
     output: OutputFormat
     property_results: dict[str, PropertyResult]
     latency: float
-    cosine_similarity: Optional[float] = None
-    verbosity: Optional[float] = None
 
 
 class Evaluator:
@@ -149,7 +147,7 @@ class Evaluator:
                 # Store results as JSON
                 tcr = TestCaseResult(
                     test_case_id=test_case.test_id,
-                    output=app_output,
+                    output=OutputFormat(answer=app_output.answer),
                     property_results=property_results,
                     latency=latency,
                 )

@@ -5,7 +5,8 @@ import numpy as np
 import openai
 from pydantic import BaseModel
 
-from llm_app_eval.evaluator import EvalProperty, OutputFormat, PropertyResult, TestCase
+from llm_app_eval.evaluator import EvalProperty, PropertyResult, TestCase
+from llm_app_eval.llm_app import OutputFormat
 
 PROPERTY_LLM = "gpt-3.5-turbo-0613"
 
