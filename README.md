@@ -4,19 +4,17 @@
 
 An implementation of the principles of evaluating LLM-based applications. This repository accompanies the blog post ['Steady the Course: Navigating the Evaluation of LLM-based Applications'](https://medium.com/@stijn.sg.goossens/steady-the-course-navigating-the-evaluation-of-llm-based-applications-8b7a22734fc9).
 
-💡 Check out the [example notebook](src/llm_app_eval/example.ipynb) for an end-to-end illustration of the most important concepts (LLM app, test case, test properties and Evaluator), including the integration with MLflow.
+💡 Check out the [example notebook](src/llm_app_eval/example.ipynb) for an end-to-end illustration of the most important concepts (LLM app, test case, test properties and Evaluator), including the integration with [MLflow](https://github.com/mlflow/mlflow/tree/master).
 
 🔑 Add your OpenAI API key to a file named `openai_key` in the root directory before running the notebook.
 
-The image below shows an architectural overview of the evaluation framework and illustrates an important feedback loop. See the aforementioned blog post for more information. The scope of this repository is indicated by the green box.
+The image below shows the evaluation framework and illustrates an important feedback loop to improve your LLM app further. See the aforementioned blog post for more information. The scope of this repository is indicated by the green box.
 
 ![Evaluation feedback loop](images/evaluation_feedback_loop.png)
 
 ## Using
 
 _Python package_: to add and install this package as a dependency of your project, run `poetry add llm-app-eval`.
-
-_Python application_: to serve this Streamlit app, run `docker compose up app` and open [localhost:8000](http://localhost:8000) in your browser. Within the Dev Container, this is equivalent to running `poe app`.
 
 ## Contributing
 
